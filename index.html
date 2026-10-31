@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#070912" />
+  <meta name="description" content="OPPIDAN: a Deltarune-inspired story about coming home, and the faces we keep." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>OPPIDAN — A Dreemurr Story</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23070912'/%3E%3Cpath d='M16 25c-7-4.5-10-8-10-12a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 4-3 7.5-10 12Z' fill='%23f3697d'/%3E%3C/svg%3E" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app" aria-label="Oppidan, a Deltarune-inspired JRPG">
+    <canvas id="game-canvas" aria-hidden="true"></canvas>
+    <div class="screen-grain" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <section id="title-screen" class="title-screen">
+      <div class="title-topline">
+        <span class="title-rule"></span>
+        <span>A DREEMURR STORY</span>
+        <span class="title-rule"></span>
+      </div>
+
+      <div class="title-lockup">
+        <p class="title-over">THE TOWN REMEMBERS</p>
+        <h1 class="game-logo" aria-label="Oppidan">OPPIDAN</h1>
+        <p class="title-sub">CHAPTER I <span>·</span> HOME</p>
+      </div>
+
+      <p class="title-blurb">
+        A story about coming home, and the face you keep<br class="desktop-break" />
+        while everyone else is looking.
+      </p>
+
+      <nav class="title-menu" aria-label="Main menu">
+        <button id="btn-start" class="menu-button menu-button--primary">
+          <span class="menu-heart" aria-hidden="true">♥</span>
+          <span>START</span>
+          <span class="menu-hint">NEW STORY</span>
+        </button>
+        <button id="btn-continue" class="menu-button" hidden>
+          <span class="menu-heart" aria-hidden="true">♥</span>
+          <span>CONTINUE</span>
+          <span class="menu-hint" id="continue-label">CHAPTER I</span>
+        </button>
+        <button id="btn-controls" class="menu-button menu-button--quiet">
+          <span>HOW TO PLAY</span>
+        </button>
+      </nav>
+
+      <footer class="title-footer">
+        <p>TOUCH · TILT · KEYBOARD</p>
+        <p class="title-content-note">Contains themes of self-image and self-hatred.</p>
+        <p class="title-credit">A non-commercial fan story inspired by Deltarune. Deltarune belongs to Toby Fox.</p>
+      </footer>
+    </section>
+
+    <section id="chapter-card" class="chapter-card" hidden aria-live="polite">
+      <div class="chapter-rule"></div>
+      <div class="chapter-copy">
+        <span id="chapter-kicker">CHAPTER I</span>
+        <strong id="chapter-title">HOME</strong>
+        <span id="chapter-meta">OPPIDAN · 6:42 PM</span>
+      </div>
+    </section>
+
+    <header id="hud" class="hud" hidden>
+      <div class="hud-left">
+        <div class="hud-chapter" id="hud-chapter">CHAPTER I <span>HOME</span></div>
+        <div class="hud-objective" id="hud-objective">
+          <span class="objective-spark" aria-hidden="true"></span>
+          <span id="objective-text">Find Chris at the plaza.</span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div id="tilt-pill" class="tilt-pill" hidden>◒ TILT</div>
+        <button id="btn-sound" class="icon-button" type="button" aria-label="Toggle sound" title="Sound">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path class="sound-wave" d="M16 8c1.5 1.3 1.5 4.7 0 6M18.5 5.5c3.2 3 3.2 9 0 12"/></svg>
+        </button>
+        <button id="btn-pause" class="icon-button" type="button" aria-label="Open menu" title="Menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section id="battle-stats" class="battle-stats" hidden aria-live="polite">
+      <div class="battle-stat-block">
+        <div class="battle-name">SRIF <span>LV 1</span></div>
+        <div class="battle-hp-row">
+          <span>HP</span>
+          <div class="hp-track"><i id="hp-fill"></i></div>
+          <b id="hp-text">24 / 24</b>
+        </div>
+      </div>
+      <div class="battle-enemy-block">
+        <div class="battle-enemy-name">THE MIRROR</div>
+        <div class="enemy-track"><i id="enemy-fill"></i></div>
+        <div id="battle-trust" class="battle-trust">IT IS LISTENING <span>○ ○ ○</span></div>
+      </div>
+    </section>
+
+    <section id="dialogue-layer" class="dialogue-layer" hidden>
+      <div id="dialogue-box" class="dialogue-box" role="dialog" aria-live="polite" aria-label="Dialogue">
+        <div id="portrait-frame" class="portrait-frame" aria-hidden="true">
+          <canvas id="portrait-canvas" width="256" height="256"></canvas>
+          <div class="portrait-shine"></div>
+        </div>
+        <div class="dialogue-content">
+          <div id="nameplate" class="nameplate" hidden><span id="speaker-name"></span></div>
+          <p id="dialogue-text" class="dialogue-text"></p>
+          <div id="choice-list" class="choice-list" hidden></div>
+          <span id="continue-mark" class="continue-mark" aria-hidden="true">▼</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="battle-actions" class="battle-actions" hidden aria-label="Battle commands"></section>
+
+    <section id="dodge-ui" class="dodge-ui" hidden>
+      <div class="dodge-hint"><span>DODGE</span><b id="dodge-timer"></b></div>
+    </section>
+
+    <section id="struggle-ui" class="struggle-ui" hidden aria-live="assertive">
+      <div class="struggle-card">
+        <p>His paw tightens.</p>
+        <button id="btn-struggle" type="button">STRUGGLE</button>
+        <div class="struggle-track"><i id="struggle-fill"></i></div>
+        <span>TAP · SPACE</span>
+      </div>
+    </section>
+
+    <div id="touch-controls" class="touch-controls" hidden>
+      <div id="joystick" class="joystick" role="group" aria-label="Movement joystick">
+        <span class="joystick-ring"></span>
+        <span class="joystick-knob" id="joystick-knob"></span>
+        <span class="joystick-label">MOVE</span>
+      </div>
+      <button id="btn-interact" class="interact-button" type="button">
+        <span class="interact-key">E</span>
+        <span id="interact-label">TALK</span>
+      </button>
+    </div>
+
+    <div id="fade" class="fade" aria-hidden="true"></div>
+
+    <section id="pause-modal" class="modal" hidden>
+      <div class="modal-backdrop" data-close-modal></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <div class="modal-top">
+          <span class="modal-eyebrow">OPPIDAN</span>
+          <button class="modal-x" type="button" data-close-modal aria-label="Close menu">×</button>
+        </div>
+        <h2 id="pause-title">PAUSED</h2>
+        <p class="modal-sub" id="pause-sub">The snow will wait.</p>
+
+        <div class="pause-options">
+          <button id="btn-resume" class="pause-button pause-button--primary" type="button">RESUME</button>
+          <button id="btn-tilt-toggle" class="pause-button" type="button">
+            <span>ACCELEROMETER</span>
+            <b id="tilt-status">OFF</b>
+          </button>
+          <button id="btn-sound-toggle" class="pause-button" type="button">
+            <span>SOUND</span>
+            <b id="sound-status">ON</b>
+          </button>
+          <button id="btn-fullscreen" class="pause-button" type="button">
+            <span>FULLSCREEN</span>
+            <b>⛶</b>
+          </button>
+        </div>
+
+        <div class="control-guide">
+          <div class="guide-row"><span>MOVE</span><b>WASD / ARROWS · TAP TO WALK · TILT</b></div>
+          <div class="guide-row"><span>INTERACT</span><b>E / SPACE / ENTER</b></div>
+          <div class="guide-row"><span>DIALOGUE</span><b>TAP OR PRESS ENTER TO CONTINUE</b></div>
+          <div class="guide-row"><span>BATTLE</span><b>CHOOSE WITH TAP / 1–4 · MOVE SOUL WITH JOYSTICK</b></div>
+        </div>
+
+        <div class="modal-danger">
+          <button id="btn-restart" class="text-button" type="button">RESTART CHAPTER</button>
+          <button id="btn-quit" class="text-button" type="button">BACK TO TITLE</button>
+        </div>
+        <p class="modal-note">Tilt is optional. On iPhone, enabling it asks for motion permission.</p>
+      </div>
+    </section>
+
+    <section id="ending-screen" class="ending-screen" hidden>
+      <div class="ending-inner">
+        <p class="ending-kicker">A DREEMURR STORY</p>
+        <h2>END OF<br /><span>CHAPTER I</span></h2>
+        <div class="ending-rule"></div>
+        <p class="ending-quote">“You don't have to be okay.<br />You just have to be here.”</p>
+        <p class="ending-copy">The town remembers. So does he.</p>
+        <div class="ending-actions">
+          <button id="btn-again" class="menu-button" type="button">PLAY AGAIN</button>
+          <button id="btn-ending-title" class="menu-button menu-button--quiet" type="button">TITLE SCREEN</button>
+        </div>
+        <p class="ending-credit">Thank you for playing.<br />A non-commercial fan story inspired by Deltarune. Deltarune belongs to Toby Fox.</p>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <noscript>
+      <div class="noscript">OPPIDAN needs JavaScript to run. Please enable it and reload.</div>
+    </noscript>
+  </main>
+
+  <script type="module" src="src/game.js"></script>
+</body>
+</html>
