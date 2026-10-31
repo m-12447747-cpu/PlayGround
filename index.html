@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b18" />
+  <meta name="description" content="SRIF: A Cold Return — a short Deltarune-inspired JRPG about coming home, wearing a face that doesn't fit, and letting people see you anyway." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23070b18'/%3E%3Cpath d='M8 13 3 8a3 3 0 0 1 5-2 3 3 0 0 1 5 2Z' fill='%23ff5d73'/%3E%3C/svg%3E" />
+  <title>SRIF: A Cold Return</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <main id="stage-wrap" aria-label="Game screen">
+      <canvas id="game" width="480" height="270" aria-label="SRIF: A Cold Return game canvas"></canvas>
+      <div id="vignette" aria-hidden="true"></div>
+      <div id="grain" aria-hidden="true"></div>
+      <button id="pause-btn" class="icon-btn hidden" type="button" aria-label="Open menu">☰</button>
+
+      <section id="title-ui" class="overlay screen">
+        <div class="title-copy">
+          <p class="eyebrow">A DELTARUNE-INSPIRED STORY</p>
+          <h1 class="logo"><span class="logo-srif">SRIF</span><span class="logo-sub">A COLD RETURN</span></h1>
+          <p class="tagline">Oppidan remembers you.<br />Do you remember you?</p>
+          <div class="menu-buttons">
+            <button class="pixel-btn primary" data-action="begin" type="button"><span>BEGIN</span><small>start the prologue</small></button>
+            <button class="pixel-btn" data-action="howto" type="button"><span>HOW TO PLAY</span></button>
+            <button class="pixel-btn" data-action="settings" type="button"><span>SETTINGS</span></button>
+          </div>
+          <p class="micro">A short JRPG prologue · headphones recommended · landscape looks best</p>
+        </div>
+        <div class="title-badge" aria-hidden="true"><span>❄</span> OPPIDAN <span>❄</span></div>
+      </section>
+
+      <section id="howto" class="overlay modal hidden" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+        <div class="panel">
+          <p class="eyebrow">FIELD MANUAL</p>
+          <h2 id="howto-title">HOW TO PLAY</h2>
+          <div class="howto-grid">
+            <div><b>MOVE</b><span>WASD / arrows / left stick / optional tilt</span></div>
+            <div><b>CONFIRM</b><span>Z / Enter / Space / A button / tap</span></div>
+            <div><b>BACK</b><span>X / Escape / B button</span></div>
+            <div><b>BATTLE</b><span>Choose FIGHT, ACT, ITEM or SPARE. Dodge inside the box.</span></div>
+          </div>
+          <p class="note">The story touches on self-image, self-hatred, and the masks we wear. Take care of yourself.</p>
+          <div class="modal-actions"><button class="pixel-btn primary" data-close="howto" type="button">GOT IT</button></div>
+        </div>
+      </section>
+
+      <section id="settings" class="overlay modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="panel">
+          <p class="eyebrow">SYSTEM</p>
+          <h2 id="settings-title">SETTINGS</h2>
+          <div class="setting-row">
+            <div><b>SOUND</b><span>Original chiptune score &amp; effects</span></div>
+            <button id="sound-toggle" class="switch" type="button" role="switch" aria-checked="true"><i></i><em>ON</em></button>
+          </div>
+          <div class="setting-row">
+            <div><b>TILT CONTROLS</b><span id="tilt-help">Optional accelerometer steering</span></div>
+            <button id="tilt-toggle" class="switch" type="button" role="switch" aria-checked="false"><i></i><em>OFF</em></button>
+          </div>
+          <div class="setting-row">
+            <div><b>REDUCE MOTION</b><span>Less snow, shake and flicker</span></div>
+            <button id="motion-toggle" class="switch" type="button" role="switch" aria-checked="false"><i></i><em>OFF</em></button>
+          </div>
+          <div class="setting-row compact">
+            <div><b>TOUCH LAYOUT</b><span id="touch-help">Shown automatically on touch screens</span></div>
+            <button id="touch-toggle" class="switch" type="button" role="switch" aria-checked="false"><i></i><em>AUTO</em></button>
+          </div>
+          <div class="modal-actions">
+            <button id="calibrate-tilt" class="pixel-btn small hidden" type="button">CALIBRATE TILT</button>
+            <button class="pixel-btn primary" data-close="settings" type="button">CLOSE</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="pause" class="overlay modal hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <div class="panel pause-panel">
+          <p class="eyebrow">PAUSED</p>
+          <h2 id="pause-title">CATCH YOUR BREATH</h2>
+          <div class="pause-list">
+            <button class="pixel-btn primary" data-action="resume" type="button">RESUME</button>
+            <button class="pixel-btn" data-action="settings" type="button">SETTINGS</button>
+            <button class="pixel-btn" data-action="restart" type="button">RESTART STORY</button>
+            <button class="pixel-btn danger" data-action="title" type="button">QUIT TO TITLE</button>
+          </div>
+          <p class="micro">The town will wait.</p>
+        </div>
+      </section>
+
+      <section id="ending" class="overlay modal hidden" role="dialog" aria-modal="true" aria-labelledby="ending-title">
+        <div class="panel ending-panel">
+          <p class="eyebrow">PROLOGUE END</p>
+          <h2 id="ending-title">YOU CAME BACK.</h2>
+          <p id="ending-copy" class="ending-copy">The snow keeps falling. The diner stays warm. For now, that is enough.</p>
+          <div id="ending-stats" class="ending-stats"></div>
+          <div class="modal-actions">
+            <button class="pixel-btn primary" data-action="again" type="button">PLAY AGAIN</button>
+            <button class="pixel-btn" data-action="title" type="button">TITLE</button>
+          </div>
+          <p class="micro">Thank you for spending time with Srif.</p>
+        </div>
+      </section>
+
+      <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+      <div id="rotate-hint" class="rotate-hint hidden"><span>↻</span> Rotate for a wider view</div>
+
+      <div id="loading" class="loading">
+        <div class="heart" aria-hidden="true"></div>
+        <p>LOADING OPPIDAN…</p>
+      </div>
+    </main>
+
+    <nav id="touch-bar" class="touch-bar" aria-label="Touch controls">
+      <div id="stick-zone" class="stick-zone" aria-label="Movement stick">
+        <div class="stick-ring"></div>
+        <div id="stick-knob" class="stick-knob"></div>
+        <span class="stick-label">MOVE</span>
+      </div>
+      <div class="touch-middle">
+        <button id="tilt-chip" class="tilt-chip" type="button" aria-pressed="false">TILT</button>
+        <span id="touch-hint" class="touch-hint">tap screen to advance</span>
+      </div>
+      <div class="action-cluster">
+        <button id="btn-b" class="round-btn b" type="button" aria-label="Back">B</button>
+        <button id="btn-a" class="round-btn a" type="button" aria-label="Confirm">A</button>
+      </div>
+    </nav>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
